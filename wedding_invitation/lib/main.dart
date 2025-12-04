@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'types.dart';
 
@@ -26,6 +28,49 @@ class WeddingApp extends StatelessWidget {
   }
 }
 
+class BackgroundLinesPainter extends CustomPainter {
+  final double phase; // Добавьте это поле
+
+  BackgroundLinesPainter({required this.phase}); // Добавьте конструктор
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFC19A6B).withOpacity(0.3)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+
+    // Волнистая линия слева
+    final leftPath = Path();
+    leftPath.moveTo(size.width * 0.1, -50);
+
+    for (double y = 0; y < size.height + 100; y += 3) {
+      final x =
+          size.width * 0.1 + sin(y * 0.02 + phase) * 40; // Добавлено + phase
+      leftPath.lineTo(x, y);
+    }
+
+    // Волнистая линия справа
+    final rightPath = Path();
+    rightPath.moveTo(size.width * 0.9, -50);
+
+    for (double y = 0; y < size.height + 100; y += 3) {
+      final x =
+          size.width * 0.9 +
+          sin(y * 0.025 + phase * 1.5) * 45; // Добавлено + phase * 1.5
+      rightPath.lineTo(x, y);
+    }
+
+    canvas.drawPath(leftPath, paint);
+    canvas.drawPath(rightPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant BackgroundLinesPainter oldDelegate) {
+    return oldDelegate.phase != phase; // Обновляем при изменении фазы
+  }
+}
+
 class WeddingInvitation extends StatefulWidget {
   const WeddingInvitation({super.key});
 
@@ -33,7 +78,8 @@ class WeddingInvitation extends StatefulWidget {
   State<WeddingInvitation> createState() => _WeddingInvitationState();
 }
 
-class _WeddingInvitationState extends State<WeddingInvitation> {
+class _WeddingInvitationState extends State<WeddingInvitation>
+    with SingleTickerProviderStateMixin {
   final List<ScheduleItem> _scheduleItems = [
     ScheduleItem(time: '15:00', event: 'Сбор гостей', isLiked: false),
     ScheduleItem(
@@ -48,8 +94,26 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
     ScheduleItem(time: '22:00', event: 'Танцы до утра', isLiked: false),
   ];
 
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 10),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // В методе build замените Stack:
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -59,14 +123,33 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
             colors: [Color(0xFFE8F4F8), Color(0xFFB8D8E8)],
           ),
         ),
-        child: ListView(
+        child: Stack(
           children: [
-            _buildHeader(),
-            _buildMainCard(),
-            _buildPhotoGallery(),
-            _buildSchedule(),
-            _buildDetails(),
-            _buildFooter(),
+            // Линии теперь поверх градиента
+            // Замените существующий Positioned.fill с CustomPaint на:
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: BackgroundLinesPainter(
+                      phase: _animationController.value * 2 * pi, // От 0 до 2π
+                    ),
+                  );
+                },
+              ),
+            ),
+            // Контент
+            ListView(
+              children: [
+                _buildHeader(),
+                _buildMainCard(),
+                _buildPhotoGallery(),
+                _buildSchedule(),
+                _buildDetails(),
+                _buildFooter(),
+              ],
+            ),
           ],
         ),
       ),
@@ -75,7 +158,7 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(top: 50, bottom: 20),
       child: Column(
         children: [
           Text(
@@ -83,14 +166,14 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w300,
-              letterSpacing: 2,
+              letterSpacing: 3,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Container(
             height: 1,
-            width: 100,
-            color: Theme.of(context).colorScheme.secondary,
+            width: 80,
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
           ),
         ],
       ),
@@ -98,39 +181,75 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
   }
 
   Widget _buildMainCard() {
-    return Card(
-      margin: const EdgeInsets.all(20),
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: [
-            Text(
-              'Роман & Рузанна',
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w400,
-                fontSize: 36,
-              ),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      child: Column(
+        children: [
+          Text(
+            'Роман & Рузанна',
+            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w400,
+              fontSize: 42,
+              letterSpacing: 1,
             ),
-            const SizedBox(height: 20),
-            Text(
-              '17 января 2026',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.secondary,
-                fontWeight: FontWeight.w300,
-              ),
+          ),
+          const SizedBox(height: 30),
+          // Добавленное изображение
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Image.asset(
+              'assets/frame.png',
+              height: 180,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  height: 180,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.secondary.withOpacity(0.3),
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Роман и Рузанна',
+                      style: TextStyle(fontSize: 18, color: Color(0xFF2C3E50)),
+                    ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 30),
+          Text(
+            '17 января 2026',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.secondary,
+              fontWeight: FontWeight.w300,
+              fontSize: 24,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Начало в 15:00',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildPhotoGallery() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Column(
         children: [
           Text(
@@ -140,208 +259,179 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 20),
-          Row(
+          const SizedBox(height: 25),
+          Wrap(
+            spacing: 15,
+            runSpacing: 15,
             children: [
-              Expanded(
-                child: Container(
-                  height: 200,
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.secondary.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.photo_camera,
-                        color: Theme.of(context).colorScheme.secondary,
-                        size: 50,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Фото 1',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  height: 200,
-                  margin: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.secondary.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.photo_camera,
-                        color: Theme.of(context).colorScheme.secondary,
-                        size: 50,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'Фото 2',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildPhotoPlaceholder('Наша первая встреча'),
+              _buildPhotoPlaceholder('Помолвка'),
+              _buildPhotoPlaceholder('Подготовка'),
+              _buildPhotoPlaceholder('Счастливые моменты'),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoPlaceholder(String title) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 160,
+        height: 200,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.3),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.photo_camera,
+              color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+              size: 40,
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSchedule() {
     return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Text(
-                'Расписание дня',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Отметьте сердечком события, которые особенно ждете!',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              ..._scheduleItems.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
-                return _buildScheduleItem(item, index);
-              }).toList(),
-            ],
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      child: Column(
+        children: [
+          Text(
+            'Расписание дня',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w400,
+            ),
           ),
-        ),
+          const SizedBox(height: 10),
+          Text(
+            'Отметьте сердечком события, которые особенно ждете!',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              fontStyle: FontStyle.italic,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          ..._scheduleItems.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            return _buildScheduleItem(item, index);
+          }).toList(),
+        ],
       ),
     );
   }
 
   Widget _buildScheduleItem(ScheduleItem item, int index) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      child: Row(
-        children: [
-          Container(
-            width: 70,
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              item.time,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              textAlign: TextAlign.center,
-            ),
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        border: Border(
+          left: BorderSide(
+            color: Theme.of(context).colorScheme.secondary,
+            width: 2,
           ),
-          const SizedBox(width: 15),
-          Expanded(
-            child: Text(
-              item.event,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-                fontSize: 16,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 15),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 70,
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                item.time,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 15,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _scheduleItems[index] = item.copyWith(isLiked: !item.isLiked);
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: item.isLiked
-                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.2)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                item.isLiked ? Icons.favorite : Icons.favorite_border,
-                color: item.isLiked
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                size: 24,
+            Expanded(
+              child: Text(
+                item.event,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 16,
+                  height: 1.4,
+                ),
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  _scheduleItems[index] = item.copyWith(isLiked: !item.isLiked);
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(shape: BoxShape.circle),
+                child: Icon(
+                  item.isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: item.isLiked
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  size: 24,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDetails() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildDetailItem('Где', 'Ресторан «Зимний сад»\nул. Снежная, 25'),
-          _buildDetailItem('Дресс-код', 'Вечерние наряды в зимней гамме'),
           _buildDetailItem(
+            Icons.location_on,
+            'Место',
+            'Ресторан «Зимний сад»\nул. Снежная, 25',
+          ),
+          const SizedBox(height: 25),
+          _buildDetailItem(
+            Icons.style,
+            'Дресс-код',
+            'Вечерние наряды\nв зимней гамме',
+          ),
+          const SizedBox(height: 25),
+          _buildDetailItem(
+            Icons.phone,
             'Контакты',
             '+7 XXX XXX-XX-XX\nroma_ruzanna@wedding.ru',
           ),
@@ -350,42 +440,56 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
     );
   }
 
-  Widget _buildDetailItem(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              title,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-                fontWeight: FontWeight.w500,
+  Widget _buildDetailItem(IconData icon, String title, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: Theme.of(context).colorScheme.secondary, size: 24),
+        const SizedBox(width: 15),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.secondary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                ),
               ),
-            ),
+              const SizedBox(height: 5),
+              Text(
+                value,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+              ),
+            ],
           ),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildFooter() {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.only(top: 40, bottom: 60, left: 20, right: 20),
       child: Column(
         children: [
           Text(
-            '«Самые прекрасные истории начинаются зимой»',
+            '«Самые прекрасные истории\nначинаются зимой»',
             style: TextStyle(
               fontStyle: FontStyle.italic,
               color: Theme.of(context).colorScheme.primary,
+              fontSize: 18,
+              height: 1.4,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 40),
           FilledButton(
             onPressed: () {
               _showConfirmationDialog();
@@ -393,12 +497,25 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.secondary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
             ),
             child: const Text(
               'Подтвердить присутствие',
               style: TextStyle(fontSize: 16),
             ),
+          ),
+          const SizedBox(height: 30),
+          Text(
+            'С любовью,\nРоман и Рузанна',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+              fontSize: 14,
+              height: 1.4,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -411,36 +528,117 @@ class _WeddingInvitationState extends State<WeddingInvitation> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Спасибо за подтверждение!',
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          content: likedEvents.isEmpty
-              ? const Text('Ждем вас на нашей свадьбе!')
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Мы заметили, что вы особенно ждете:'),
-                    const SizedBox(height: 10),
-                    ...likedEvents
-                        .map(
-                          (event) => Text('• ${event.time} - ${event.event}'),
-                        )
-                        .toList(),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.all(25),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Спасибо за подтверждение!',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Закрыть'),
+                const SizedBox(height: 15),
+                likedEvents.isEmpty
+                    ? Text(
+                        'Ждем вас на нашей свадьбе!',
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.7),
+                          fontSize: 16,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Мы заметили, что вы особенно ждете:',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.7),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          ...likedEvents
+                              .map(
+                                (event) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.favorite,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.secondary,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${event.time} - ${event.event}',
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ],
+                      ),
+                const SizedBox(height: 25),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Закрыть',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
+    );
+  }
+}
+
+class ScheduleItem {
+  final String time;
+  final String event;
+  final bool isLiked;
+
+  ScheduleItem({
+    required this.time,
+    required this.event,
+    required this.isLiked,
+  });
+
+  ScheduleItem copyWith({String? time, String? event, bool? isLiked}) {
+    return ScheduleItem(
+      time: time ?? this.time,
+      event: event ?? this.event,
+      isLiked: isLiked ?? this.isLiked,
     );
   }
 }
