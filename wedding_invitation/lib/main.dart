@@ -15,7 +15,7 @@ class WeddingApp extends StatelessWidget {
     return MaterialApp(
       title: 'Свадьба Романа и Рузанны',
       theme: ThemeData(
-        fontFamily: 'Playfair',
+        fontFamily: 'Gnocchi',
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE8F4F8),
           primary: const Color(0xFF2C3E50),
@@ -28,46 +28,132 @@ class WeddingApp extends StatelessWidget {
   }
 }
 
-class BackgroundLinesPainter extends CustomPainter {
-  final double phase; // Добавьте это поле
+class SaveDateWavePainter extends CustomPainter {
+  final double phase;
+  final Color color;
 
-  BackgroundLinesPainter({required this.phase}); // Добавьте конструктор
+  SaveDateWavePainter({
+    required this.phase,
+    this.color = const Color(0xFF2C3E50),
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFC19A6B).withOpacity(0.3)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke;
+    const startY = 120.0;
+    const fontSize = 16.0;
 
-    // Волнистая линия слева
-    final leftPath = Path();
-    leftPath.moveTo(size.width * 0.1, -50);
+    final text =
+        'save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date';
 
-    for (double y = 0; y < size.height + 100; y += 3) {
-      final x =
-          size.width * 0.1 + sin(y * 0.02 + phase) * 40; // Добавлено + phase
-      leftPath.lineTo(x, y);
+    // Используем шрифт Gnocchi
+    final textStyle = TextStyle(
+      fontFamily: 'Gnocchi',
+      color: color.withOpacity(0.25),
+      fontSize: fontSize,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 10,
+    );
+
+    // Разбиваем текст на отдельные буквы для анимации
+    for (int i = 0; i < text.length; i++) {
+      final letter = text[i];
+      final textSpan = TextSpan(text: letter, style: textStyle);
+
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+
+      // Вычисляем базовую позицию буквы
+      final baseX = i * (fontSize * 0.8);
+      final baseY = startY;
+
+      // Создаем волнообразное движение для каждой буквы
+      final letterPhase = phase + i * 0.25; // Меньший шаг для плавности
+
+      // Основная волна с УВЕЛИЧЕННОЙ амплитудой
+      final mainWave = sin(letterPhase) * 8;
+
+      // Вторичная волна для более интересного движения
+      final secondaryWave = sin(letterPhase * 1.7 + 0.5) * 4;
+
+      // Третичная волна для мелкой ряби
+      final rippleWave = sin(letterPhase * 2.3 + 1.2) * 2;
+
+      // Вертикальное смещение (вверх-вниз)
+      final verticalOffset = mainWave + secondaryWave + rippleWave;
+
+      // Горизонтальное движение - очень медленное
+      final x = baseX - phase * 15;
+      final y = baseY + verticalOffset;
+
+      // Добавляем легкое масштабирование для эффекта "дыхания"
+      final scale = 1.0 + sin(letterPhase * 0.8) * 0.05;
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.scale(scale); // Применяем масштабирование
+      textPainter.paint(canvas, Offset.zero);
+      canvas.restore();
+
+      // Если текст ушел за левый край, начинаем его снова справа
+      if (x + fontSize < 0) {
+        final newX = size.width + (x % size.width);
+        canvas.save();
+        canvas.translate(newX, y);
+        canvas.scale(scale);
+        textPainter.paint(canvas, Offset.zero);
+        canvas.restore();
+      }
     }
 
-    // Волнистая линия справа
-    final rightPath = Path();
-    rightPath.moveTo(size.width * 0.9, -50);
+    // Добавляем вторую линию ниже для большей плотности
+    for (int i = 0; i < text.length; i++) {
+      final letter = text[i];
+      final textSpan = TextSpan(
+        text: letter,
+        style: textStyle.copyWith(color: color.withOpacity(0.15)),
+      );
 
-    for (double y = 0; y < size.height + 100; y += 3) {
-      final x =
-          size.width * 0.9 +
-          sin(y * 0.025 + phase * 1.5) * 45; // Добавлено + phase * 1.5
-      rightPath.lineTo(x, y);
+      final textPainter = TextPainter(
+        text: textSpan,
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+
+      // Вторая линия ниже первой
+      final baseX = i * (fontSize * 0.8) + fontSize * 0.4;
+      final baseY = startY + 50;
+
+      final letterPhase = phase + i * 0.3 + 1.0; // Сдвиг фазы
+
+      // Волна для второй линии
+      final mainWave = sin(letterPhase * 0.9) * 6;
+      final secondaryWave = sin(letterPhase * 1.4 + 0.8) * 3;
+      final verticalOffset = mainWave + secondaryWave;
+
+      final x = baseX - phase * 12; // Другая скорость
+      final y = baseY + verticalOffset;
+
+      canvas.save();
+      canvas.translate(x, y);
+      textPainter.paint(canvas, Offset.zero);
+      canvas.restore();
+
+      if (x + fontSize < 0) {
+        final newX = size.width + (x % size.width);
+        canvas.save();
+        canvas.translate(newX, y);
+        textPainter.paint(canvas, Offset.zero);
+        canvas.restore();
+      }
     }
-
-    canvas.drawPath(leftPath, paint);
-    canvas.drawPath(rightPath, paint);
   }
 
   @override
-  bool shouldRepaint(covariant BackgroundLinesPainter oldDelegate) {
-    return oldDelegate.phase != phase; // Обновляем при изменении фазы
+  bool shouldRepaint(covariant SaveDateWavePainter oldDelegate) {
+    return oldDelegate.phase != phase;
   }
 }
 
@@ -113,7 +199,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
 
   @override
   Widget build(BuildContext context) {
-    // В методе build замените Stack:
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -125,21 +210,24 @@ class _WeddingInvitationState extends State<WeddingInvitation>
         ),
         child: Stack(
           children: [
-            // Линии теперь поверх градиента
-            // Замените существующий Positioned.fill с CustomPaint на:
-            Positioned.fill(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 150,
               child: AnimatedBuilder(
                 animation: _animationController,
                 builder: (context, child) {
                   return CustomPaint(
-                    painter: BackgroundLinesPainter(
-                      phase: _animationController.value * 2 * pi, // От 0 до 2π
+                    painter: SaveDateWavePainter(
+                      phase: _animationController.value * 2 * pi,
+                      color: Colors.black,
                     ),
                   );
                 },
               ),
             ),
-            // Контент
+            // Основной контент
             ListView(
               children: [
                 _buildHeader(),
@@ -195,7 +283,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
             ),
           ),
           const SizedBox(height: 30),
-          // Добавленное изображение
           Container(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Image.asset(
