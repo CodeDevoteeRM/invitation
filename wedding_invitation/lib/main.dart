@@ -1,6 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:wedding_invitation/utils/calendar_u.dart';
+import 'package:wedding_invitation/widgets/add_to_calendar_but.dart'
+    as calendar_button;
+import 'package:wedding_invitation/widgets/calendar_w.dart' as calendar_widget;
+import 'package:wedding_invitation/widgets/schedule_w.dart';
 import 'types.dart';
 
 void main() {
@@ -24,6 +29,7 @@ class WeddingApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const WeddingInvitation(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -186,7 +192,7 @@ class _WeddingInvitationState extends State<WeddingInvitation>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat();
   }
@@ -232,8 +238,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
               children: [
                 _buildHeader(),
                 _buildMainCard(),
-                _buildPhotoGallery(),
-                _buildSchedule(),
                 _buildDetails(),
                 _buildFooter(),
               ],
@@ -312,50 +316,63 @@ class _WeddingInvitationState extends State<WeddingInvitation>
             ),
           ),
           const SizedBox(height: 30),
-          Text(
-            '17 января 2026',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.secondary,
-              fontWeight: FontWeight.w300,
-              fontSize: 24,
-            ),
-          ),
+          _buildCalendarHeart(),
           const SizedBox(height: 10),
-          Text(
-            'Начало в 15:00',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-              fontSize: 16,
-              fontWeight: FontWeight.w300,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [ScheduleWidget()],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPhotoGallery() {
+  Widget _buildTimelineItem(String time, String event, {bool isLast = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: Column(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Время
           Text(
-            'Наши моменты',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            time,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
               color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: 25),
-          Wrap(
-            spacing: 15,
-            runSpacing: 15,
+          const SizedBox(width: 12),
+          // Линия и точка (упрощенно)
+          Column(
             children: [
-              _buildPhotoPlaceholder('Наша первая встреча'),
-              _buildPhotoPlaceholder('Помолвка'),
-              _buildPhotoPlaceholder('Подготовка'),
-              _buildPhotoPlaceholder('Счастливые моменты'),
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              if (!isLast)
+                Container(
+                  width: 1,
+                  height: 24,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                ),
             ],
+          ),
+          const SizedBox(width: 12),
+          // Описание
+          Expanded(
+            child: Text(
+              event,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w300,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.85),
+              ),
+            ),
           ),
         ],
       ),
@@ -402,35 +419,18 @@ class _WeddingInvitationState extends State<WeddingInvitation>
     );
   }
 
-  Widget _buildSchedule() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: Column(
-        children: [
-          Text(
-            'Расписание дня',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Отметьте сердечком события, которые особенно ждете!',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-              fontStyle: FontStyle.italic,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-          ..._scheduleItems.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return _buildScheduleItem(item, index);
-          }).toList(),
-        ],
-      ),
+  Widget _buildCalendarHeart() {
+    return Column(
+      children: [
+        calendar_widget.CalendarWidget(
+          animationController: _animationController,
+        ),
+        // calendar_button.AddToCalendarButton(
+        //   onPressed: () {
+        //     CalendarService.showConfirmationDialog(context);
+        //   },
+        // ),
+      ],
     );
   }
 
@@ -508,13 +508,7 @@ class _WeddingInvitationState extends State<WeddingInvitation>
           _buildDetailItem(
             Icons.location_on,
             'Место',
-            'Ресторан «Зимний сад»\nул. Снежная, 25',
-          ),
-          const SizedBox(height: 25),
-          _buildDetailItem(
-            Icons.style,
-            'Дресс-код',
-            'Вечерние наряды\nв зимней гамме',
+            'Ресторан «Метрополь Холл»\nВидное',
           ),
           const SizedBox(height: 25),
           _buildDetailItem(
@@ -566,35 +560,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
       padding: const EdgeInsets.only(top: 40, bottom: 60, left: 20, right: 20),
       child: Column(
         children: [
-          Text(
-            '«Самые прекрасные истории\nначинаются зимой»',
-            style: TextStyle(
-              fontStyle: FontStyle.italic,
-              color: Theme.of(context).colorScheme.primary,
-              fontSize: 18,
-              height: 1.4,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 40),
-          FilledButton(
-            onPressed: () {
-              _showConfirmationDialog();
-            },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            child: const Text(
-              'Подтвердить присутствие',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-          const SizedBox(height: 30),
           Text(
             'С любовью,\nРоман и Рузанна',
             style: TextStyle(
