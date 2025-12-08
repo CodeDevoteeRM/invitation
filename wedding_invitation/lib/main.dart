@@ -5,7 +5,9 @@ import 'package:wedding_invitation/utils/calendar_u.dart';
 import 'package:wedding_invitation/widgets/add_to_calendar_but.dart'
     as calendar_button;
 import 'package:wedding_invitation/widgets/calendar_w.dart' as calendar_widget;
-import 'package:wedding_invitation/widgets/schedule_w.dart';
+import 'package:wedding_invitation/widgets/location_w.dart';
+import 'package:wedding_invitation/widgets/schedule_w.dart' hide ScheduleItem;
+import 'package:wedding_invitation/widgets/table_arrangement_w.dart';
 import 'types.dart';
 
 void main() {
@@ -238,7 +240,12 @@ class _WeddingInvitationState extends State<WeddingInvitation>
               children: [
                 _buildHeader(),
                 _buildMainCard(),
-                _buildDetails(),
+                LocationWidget(style: LocationStyle.elegant),
+                TableArrangementWidget(
+                  style: TableArrangementStyle.elegant,
+                  title: 'Рассадка гостей',
+                  totalGuests: 70,
+                ),
                 _buildFooter(),
               ],
             ),
@@ -327,98 +334,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
     );
   }
 
-  Widget _buildTimelineItem(String time, String event, {bool isLast = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Время
-          Text(
-            time,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Линия и точка (упрощенно)
-          Column(
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              if (!isLast)
-                Container(
-                  width: 1,
-                  height: 24,
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                ),
-            ],
-          ),
-          const SizedBox(width: 12),
-          // Описание
-          Expanded(
-            child: Text(
-              event,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w300,
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.85),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPhotoPlaceholder(String title) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 160,
-        height: 200,
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.3),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
-            width: 1,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.photo_camera,
-              color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
-              size: 40,
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCalendarHeart() {
     return Column(
       children: [
@@ -430,127 +345,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
         //     CalendarService.showConfirmationDialog(context);
         //   },
         // ),
-      ],
-    );
-  }
-
-  Widget _buildScheduleItem(ScheduleItem item, int index) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      decoration: BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: Theme.of(context).colorScheme.secondary,
-            width: 2,
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 15),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 70,
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                item.time,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                item.event,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 16,
-                  height: 1.4,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _scheduleItems[index] = item.copyWith(isLiked: !item.isLiked);
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(shape: BoxShape.circle),
-                child: Icon(
-                  item.isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: item.isLiked
-                      ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  size: 24,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetails() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildDetailItem(
-            Icons.location_on,
-            'Место',
-            'Ресторан «Метрополь Холл»\nВидное',
-          ),
-          const SizedBox(height: 25),
-          _buildDetailItem(
-            Icons.phone,
-            'Контакты',
-            '+7 XXX XXX-XX-XX\nroma_ruzanna@wedding.ru',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(IconData icon, String title, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: Theme.of(context).colorScheme.secondary, size: 24),
-        const SizedBox(width: 15),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                value,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 16,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -571,126 +365,6 @@ class _WeddingInvitationState extends State<WeddingInvitation>
           ),
         ],
       ),
-    );
-  }
-
-  void _showConfirmationDialog() {
-    final likedEvents = _scheduleItems.where((item) => item.isLiked).toList();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(25),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Спасибо за подтверждение!',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                likedEvents.isEmpty
-                    ? Text(
-                        'Ждем вас на нашей свадьбе!',
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.7),
-                          fontSize: 16,
-                        ),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Мы заметили, что вы особенно ждете:',
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.7),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          ...likedEvents
-                              .map(
-                                (event) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 5),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.favorite,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.secondary,
-                                        size: 16,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        '${event.time} - ${event.event}',
-                                        style: TextStyle(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ],
-                      ),
-                const SizedBox(height: 25),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Закрыть',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class ScheduleItem {
-  final String time;
-  final String event;
-  final bool isLiked;
-
-  ScheduleItem({
-    required this.time,
-    required this.event,
-    required this.isLiked,
-  });
-
-  ScheduleItem copyWith({String? time, String? event, bool? isLiked}) {
-    return ScheduleItem(
-      time: time ?? this.time,
-      event: event ?? this.event,
-      isLiked: isLiked ?? this.isLiked,
     );
   }
 }
