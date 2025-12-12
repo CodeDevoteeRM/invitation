@@ -15,7 +15,7 @@ class CalendarWidget extends StatelessWidget {
         Text(
           'Январь 2026',
           style: TextStyle(
-            color: colorScheme.secondary, // #765B50
+            color: colorScheme.secondary,
             fontSize: 22,
             fontWeight: FontWeight.w500,
             letterSpacing: 1.5,
@@ -44,7 +44,6 @@ class CalendarWidget extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Дни недели
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) {
@@ -59,10 +58,7 @@ class CalendarWidget extends StatelessWidget {
                   );
                 }).toList(),
               ),
-
               const SizedBox(height: 20),
-
-              // Сетка дней
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -87,10 +83,7 @@ class CalendarWidget extends StatelessWidget {
                       : _buildRegularDayCell(context, dayNumber);
                 },
               ),
-
               const SizedBox(height: 24),
-
-              // Подпись
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -103,31 +96,31 @@ class CalendarWidget extends StatelessWidget {
                     color: colorScheme.tertiary.withOpacity(0.2), // #BA9B8E
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 8, // Расстояние между строками если будет перенос
                   children: [
-                    AnimatedBuilder(
-                      animation: animationController,
-                      builder: (context, child) {
-                        final beatCycle = animationController.value % 0.8;
-                        double iconSize = 16;
+                    // AnimatedBuilder(
+                    //   animation: animationController,
+                    //   builder: (context, child) {
+                    //     final beatCycle = animationController.value % 0.8;
+                    //     double iconSize = 16;
 
-                        if (beatCycle < 0.15) {
-                          iconSize = 16 + sin(beatCycle * 40) * 4;
-                        } else if (beatCycle >= 0.2 && beatCycle < 0.35) {
-                          iconSize = 16 + sin((beatCycle - 0.2) * 40) * 3;
-                        }
+                    //     if (beatCycle < 0.15) {
+                    //       iconSize = 16 + sin(beatCycle * 40) * 4;
+                    //     } else if (beatCycle >= 0.2 && beatCycle < 0.35) {
+                    //       iconSize = 16 + sin((beatCycle - 0.2) * 40) * 3;
+                    //     }
 
-                        return Icon(
-                          Icons.favorite,
-                          color: colorScheme.secondary.withOpacity(
-                            0.8,
-                          ), // #765B50 с прозрачностью
-                          size: iconSize,
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 10),
+                    //     return Icon(
+                    //       Icons.favorite,
+                    //       color: colorScheme.secondary.withOpacity(0.8),
+                    //       size: iconSize,
+                    //     );
+                    //   },
+                    // ),
                     Text(
                       '11.01.2026 - наша свадьба',
                       style: TextStyle(
@@ -136,6 +129,7 @@ class CalendarWidget extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -157,15 +151,12 @@ class CalendarWidget extends StatelessWidget {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // Фон ячейки - прозрачный
           Container(
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-
-          // ОЧЕНЬ прозрачное пульсирующее сердечко, сдвинутое влево
           AnimatedBuilder(
             animation: animationController,
             builder: (context, child) {
@@ -173,7 +164,7 @@ class CalendarWidget extends StatelessWidget {
               final beatCycle = time % 0.8;
 
               double pulse = 1.0;
-              double opacity = 0.35; // ОЧЕНЬ ПРОЗРАЧНОЕ - 25% непрозрачности
+              double opacity = 0.35;
 
               // Двойной пульс с изменением прозрачности
               if (beatCycle < 0.15) {
@@ -192,27 +183,21 @@ class CalendarWidget extends StatelessWidget {
                   scale: pulse,
                   child: Icon(
                     Icons.favorite,
-                    color: colorScheme.secondary.withOpacity(
-                      opacity,
-                    ), // Очень прозрачное
-                    size: 38, // Немного меньше
+                    color: colorScheme.secondary.withOpacity(opacity),
+                    size: 38,
                   ),
                 ),
               );
             },
           ),
-
-          // Цифра дня - хорошо видимая
           Positioned.fill(
             child: Align(
               alignment: Alignment.center,
               child: Text(
                 day.toString(),
                 style: TextStyle(
-                  color: colorScheme.primary.withOpacity(
-                    0.85,
-                  ), // Хорошо видимая цифра
-                  fontSize: 20, // Крупнее
+                  color: colorScheme.primary.withOpacity(0.85),
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                   fontFamily: 'Gnocchi',
                 ),
@@ -224,75 +209,6 @@ class CalendarWidget extends StatelessWidget {
     );
   }
 
-  // Альтернативный вариант - сердце поверх цифры
-  Widget _buildWeddingDayCellAlt(BuildContext context, int day) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          // Цифра дня - основной элемент
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: colorScheme.primary.withOpacity(0.1), // Легкий фон
-            ),
-            child: Center(
-              child: Text(
-                day.toString(),
-                style: TextStyle(
-                  color: colorScheme.primary.withOpacity(0.9), // Четкая цифра
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Gnocchi',
-                ),
-              ),
-            ),
-          ),
-
-          // Полупрозрачное сердечко поверх цифры
-          Positioned(
-            right: 2, // Сдвигаем немного вправо от центра
-            top: 2,
-            child: AnimatedBuilder(
-              animation: animationController,
-              builder: (context, child) {
-                final time = animationController.value;
-                final beatCycle = time % 0.8;
-
-                double pulse = 1.0;
-                double opacity = 0.5; // Полупрозрачное
-
-                if (beatCycle < 0.15) {
-                  pulse = 1.0 + sin(beatCycle * 40) * 0.2;
-                  opacity = 0.5 + sin(beatCycle * 40) * 0.3;
-                }
-
-                return Transform.scale(
-                  scale: pulse,
-                  child: Icon(
-                    Icons.favorite,
-                    color: colorScheme.secondary.withOpacity(
-                      opacity,
-                    ), // #765B50 с прозрачностью
-                    size: 24, // Небольшое сердце
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Обычная ячейка
   Widget _buildRegularDayCell(BuildContext context, int day) {
     final colorScheme = Theme.of(context).colorScheme;
 

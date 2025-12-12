@@ -1,14 +1,19 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+// import 'package:wedding_invitation/music_player.dart';
 import 'package:wedding_invitation/widgets/calendar.dart' as calendar_widget;
-import 'package:wedding_invitation/widgets/location_w.dart';
+import 'package:wedding_invitation/widgets/location.dart';
 import 'package:wedding_invitation/widgets/main_header.dart';
-import 'package:wedding_invitation/widgets/schedule_w.dart' hide ScheduleItem;
+import 'package:wedding_invitation/widgets/schedule.dart' hide ScheduleItem;
 import 'package:wedding_invitation/widgets/table_arrangement.dart';
 import 'types.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const WeddingApp());
 }
 
@@ -22,14 +27,14 @@ class WeddingApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: 'Gnocchi',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF91B287), // Основной мягкий зеленый
-          primary: const Color(0xFF4C6444), // Темный зеленый
+          seedColor: const Color(0xFF91B287),
+          primary: const Color(0xFF4C6444),
           onPrimary: Colors.white,
-          secondary: const Color(0xFF765B50), // Коричневый
+          secondary: const Color(0xFF765B50),
           onSecondary: Colors.white,
-          tertiary: const Color(0xFFBA9B8E), // Светлый бежевый
-          surface: const Color(0xFFF8F4F0), // Светлый фон
-          background: const Color(0xFFF5F0EB), // Фон
+          tertiary: const Color(0xFFBA9B8E),
+          surface: const Color(0xFFF8F4F0),
+          background: const Color(0xFFF5F0EB),
           error: const Color(0xFFD32F2F),
         ),
         useMaterial3: true,
@@ -46,7 +51,7 @@ class SaveDateWavePainter extends CustomPainter {
 
   SaveDateWavePainter({
     required this.phase,
-    this.color = const Color(0xFF4C6444), // Изменен на темный зеленый
+    this.color = const Color(0xFF4C6444),
   });
 
   @override
@@ -57,16 +62,14 @@ class SaveDateWavePainter extends CustomPainter {
     final text =
         'save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date ✦ save the date';
 
-    // Используем шрифт Gnocchi
     final textStyle = TextStyle(
       fontFamily: 'Gnocchi',
-      color: color.withOpacity(0.2), // Более прозрачный цвет
+      color: color.withOpacity(0.2),
       fontSize: fontSize,
       fontWeight: FontWeight.w400,
       letterSpacing: 10,
     );
 
-    // Разбиваем текст на отдельные буквы для анимации
     for (int i = 0; i < text.length; i++) {
       final letter = text[i];
       final textSpan = TextSpan(text: letter, style: textStyle);
@@ -77,39 +80,25 @@ class SaveDateWavePainter extends CustomPainter {
       );
       textPainter.layout();
 
-      // Вычисляем базовую позицию буквы
       final baseX = i * (fontSize * 0.8);
       final baseY = startY;
 
-      // Создаем волнообразное движение для каждой буквы
-      final letterPhase = phase + i * 0.25; // Меньший шаг для плавности
-
-      // Основная волна с УВЕЛИЧЕННОЙ амплитудой
+      final letterPhase = phase + i * 0.25;
       final mainWave = sin(letterPhase) * 8;
-
-      // Вторичная волна для более интересного движения
       final secondaryWave = sin(letterPhase * 1.7 + 0.5) * 4;
-
-      // Третичная волна для мелкой ряби
       final rippleWave = sin(letterPhase * 2.3 + 1.2) * 2;
-
-      // Вертикальное смещение (вверх-вниз)
       final verticalOffset = mainWave + secondaryWave + rippleWave;
-
-      // Горизонтальное движение - очень медленное
       final x = baseX - phase * 15;
       final y = baseY + verticalOffset;
 
-      // Добавляем легкое масштабирование для эффекта "дыхания"
       final scale = 1.0 + sin(letterPhase * 0.8) * 0.05;
 
       canvas.save();
       canvas.translate(x, y);
-      canvas.scale(scale); // Применяем масштабирование
+      canvas.scale(scale);
       textPainter.paint(canvas, Offset.zero);
       canvas.restore();
 
-      // Если текст ушел за левый край, начинаем его снова справа
       if (x + fontSize < 0) {
         final newX = size.width + (x % size.width);
         canvas.save();
@@ -120,14 +109,11 @@ class SaveDateWavePainter extends CustomPainter {
       }
     }
 
-    // Добавляем вторую линию ниже для большей плотности
     for (int i = 0; i < text.length; i++) {
       final letter = text[i];
       final textSpan = TextSpan(
         text: letter,
-        style: textStyle.copyWith(
-          color: color.withOpacity(0.1),
-        ), // Еще более прозрачный
+        style: textStyle.copyWith(color: color.withOpacity(0.1)),
       );
 
       final textPainter = TextPainter(
@@ -136,18 +122,15 @@ class SaveDateWavePainter extends CustomPainter {
       );
       textPainter.layout();
 
-      // Вторая линия ниже первой
       final baseX = i * (fontSize * 0.8) + fontSize * 0.4;
       final baseY = startY + 50;
 
-      final letterPhase = phase + i * 0.3 + 1.0; // Сдвиг фазы
-
-      // Волна для второй линии
+      final letterPhase = phase + i * 0.3 + 1.0;
       final mainWave = sin(letterPhase * 0.9) * 6;
       final secondaryWave = sin(letterPhase * 1.4 + 0.8) * 3;
       final verticalOffset = mainWave + secondaryWave;
 
-      final x = baseX - phase * 12; // Другая скорость
+      final x = baseX - phase * 12;
       final y = baseY + verticalOffset;
 
       canvas.save();
@@ -195,6 +178,7 @@ class _WeddingInvitationState extends State<WeddingInvitation>
   ];
 
   late AnimationController _animationController;
+  // final MusicPlayer _musicPlayer = MusicPlayer();
 
   @override
   void initState() {
@@ -203,65 +187,87 @@ class _WeddingInvitationState extends State<WeddingInvitation>
       duration: const Duration(seconds: 4),
       vsync: this,
     )..repeat();
+
+    // Запуск музыки с учетом платформы
+    // _startMusicBasedOnPlatform();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    // _musicPlayer.stop();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFF8F4F0), // Светлый верх
-                Color(0xFFF5F0EB), // Светлый низ
-              ],
-            ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset('assets/flowers1.png', fit: BoxFit.cover),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                height: 150,
-                child: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: SaveDateWavePainter(
-                        phase: _animationController.value * 2 * pi,
-                        color: const Color(0xFF4C6444),
-                      ),
-                    );
-                  },
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.white.withOpacity(0.1),
+                    Colors.white.withOpacity(0.7),
+                    Colors.white.withOpacity(0.4),
+                  ],
+                  stops: [0.0, 0.3, 0.6, 1.0],
                 ),
               ),
-              // Основной контент
-              Column(
-                children: [
-                  AnimatedHeaderWidget(),
-                  _buildCalendarHeart(),
-                  ScheduleWidget(
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 150,
+            child: AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return CustomPaint(
+                  painter: SaveDateWavePainter(
+                    phase: _animationController.value * 2 * pi,
+                    color: Color(0xFF4C6444),
+                  ),
+                );
+              },
+            ),
+          ),
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                AnimatedHeaderWidget(),
+                _buildCalendarHeart(),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.of(context).size.width < 360
+                        ? 20
+                        : 16,
+                  ),
+                  child: ScheduleWidget(
                     style: ScheduleStyle.elegant,
                     customTitle: 'Расписание свадебного дня',
                   ),
-                  LocationWidget(style: LocationStyle.elegant),
-                  TableArrangementWidget(),
-                  _buildFooter(),
-                ],
-              ),
-            ],
+                ),
+                LocationWidget(style: LocationStyle.elegant),
+                TableArrangementWidget(),
+                _buildFooter(),
+              ],
+            ),
           ),
-        ),
+
+          // // Кнопка управления музыкой (видна только если музыка доступна)
+          // if (_musicPlayer.canAutoPlay)
+          //   Positioned(top: 160, right: 20, child: _buildMusicControlButton()),
+        ],
       ),
     );
   }
@@ -269,32 +275,129 @@ class _WeddingInvitationState extends State<WeddingInvitation>
   Widget _buildCalendarHeart() {
     return Column(
       children: [
-        calendar_widget.CalendarWidget(
-          animationController: _animationController,
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width < 360 ? 20 : 14,
+          ),
+          child: calendar_widget.CalendarWidget(
+            animationController: _animationController,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildFooter() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 60, left: 20, right: 20),
-      child: Column(
-        children: [
-          Text(
-            'С любовью,\nРоман и Рузанна',
-            style: TextStyle(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withOpacity(0.7), // Более насыщенный
-              fontSize: 16, // Немного больше
-              height: 1.4,
-              fontStyle: FontStyle.italic,
+    return Container(
+      padding: const EdgeInsets.only(top: 40, bottom: 50),
+      child: Text(
+        'С любовью,\nРоман и Рузанна',
+        style: TextStyle(
+          color: const Color(0xFF4C6444),
+          fontSize: 18,
+          height: 1.4,
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.w500,
+          shadows: [
+            Shadow(
+              color: Colors.white.withOpacity(0.8),
+              blurRadius: 10,
+              offset: const Offset(0, 0),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
+
+  // Future<void> _startMusicBasedOnPlatform() async {
+  //   // Для web - не запускаем автоматически
+  //   if (kIsWeb) {
+  //     print('🌐 Web версия - автозапуск музыки отключен');
+  //     return;
+  //   }
+
+  //   // Для Android и iOS - запускаем автоматически
+  //   print('📱 Мобильная версия - запускаем музыку автоматически');
+
+  //   // Небольшая задержка для инициализации
+  //   await Future.delayed(const Duration(milliseconds: 500));
+
+  //   try {
+  //     await _musicPlayer.initialize();
+  //     await _musicPlayer.playWithDelay();
+  //   } catch (e) {
+  //     print('⚠️ Не удалось запустить музыку: $e');
+  //   }
+  // }
+
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   // Управление музыкой при сворачивании/разворачивании приложения
+  //   if (state == AppLifecycleState.paused) {
+  //     // При сворачивании приложения
+  //     if (_musicPlayer.isPlaying && !kIsWeb) {
+  //       _musicPlayer.pause();
+  //     }
+  //   } else if (state == AppLifecycleState.resumed) {
+  //     // При разворачивании приложения
+  //     if (!_musicPlayer.isPlaying && !kIsWeb) {
+  //       _musicPlayer.play();
+  //     }
+  //   }
+  // }
+
+  // Widget _buildMusicControlButton() {
+  //   return GestureDetector(
+  //     onTap: () {
+  //       if (_musicPlayer.isPlaying) {
+  //         _musicPlayer.pause();
+  //       } else {
+  //         _musicPlayer.play();
+  //       }
+  //       setState(() {});
+  //     },
+  //     child: AnimatedContainer(
+  //       duration: const Duration(milliseconds: 300),
+  //       padding: const EdgeInsets.all(12),
+  //       decoration: BoxDecoration(
+  //         color: Colors.white.withOpacity(_musicPlayer.isPlaying ? 0.95 : 0.85),
+  //         borderRadius: BorderRadius.circular(30),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.black.withOpacity(0.15),
+  //             blurRadius: 10,
+  //             offset: const Offset(0, 4),
+  //           ),
+  //         ],
+  //         border: Border.all(
+  //           color: const Color(0xFF4C6444).withOpacity(0.3),
+  //           width: 1,
+  //         ),
+  //       ),
+  //       child: Row(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           Icon(
+  //             _musicPlayer.isPlaying ? Icons.music_note : Icons.music_off,
+  //             color: const Color(0xFF4C6444),
+  //             size: 22,
+  //           ),
+  //           if (_musicPlayer.isPlaying) ...[
+  //             const SizedBox(width: 8),
+  //             Text(
+  //               'Музыка',
+  //               style: TextStyle(
+  //                 color: const Color(0xFF4C6444),
+  //                 fontSize: 14,
+  //                 fontWeight: FontWeight.w500,
+  //               ),
+  //             ),
+  //           ],
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }

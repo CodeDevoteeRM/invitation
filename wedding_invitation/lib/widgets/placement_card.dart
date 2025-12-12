@@ -20,7 +20,6 @@ class TablesGridWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Определяем количество колонок в зависимости от ширины экрана
         final screenWidth = constraints.maxWidth;
         int crossAxisCount;
         double childAspectRatio;
@@ -41,8 +40,8 @@ class TablesGridWidget extends StatelessWidget {
         }
 
         return GridView.builder(
-          shrinkWrap: true, // ВАЖНО: добавляем shrinkWrap
-          physics: const NeverScrollableScrollPhysics(), // ВАЖНО: отключаем собственную прокрутку
+          shrinkWrap: true, 
+          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,

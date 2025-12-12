@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class ScheduleWidget extends StatelessWidget {
@@ -55,7 +57,6 @@ class ScheduleWidget extends StatelessWidget {
     }
   }
 
-  // Стиль 1: Элегантный (по умолчанию)
   Widget _buildElegantStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -67,7 +68,6 @@ class ScheduleWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (showTitle) ...[
-              // Декоративный разделитель
               Container(
                 width: 80,
                 height: 2,
@@ -82,26 +82,26 @@ class ScheduleWidget extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Заголовок
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.center,
+                spacing: 10,
                 children: [
                   Icon(
                     Icons.access_time_filled,
-                    color: colorScheme.primary, // #4C6444
+                    color: colorScheme.primary,
                     size: 22,
                   ),
-                  const SizedBox(width: 10),
                   Text(
                     customTitle ?? 'План дня',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: colorScheme.primary, // #4C6444
+                      color: colorScheme.primary,
                       letterSpacing: 0.5,
                       fontFamily: 'Gnocchi',
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -117,8 +117,6 @@ class ScheduleWidget extends StatelessWidget {
               ),
               const SizedBox(height: 24),
             ],
-
-            // Карточка с расписанием
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -163,8 +161,6 @@ class ScheduleWidget extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Декоративный элемент внизу
             Container(
               margin: const EdgeInsets.only(top: 24),
               child: Row(
@@ -179,7 +175,7 @@ class ScheduleWidget extends StatelessWidget {
                   Text(
                     'Ждём каждого из вас!',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w300,
                       color: colorScheme.secondary.withOpacity(0.6), // #765B50
                     ),
@@ -199,7 +195,6 @@ class ScheduleWidget extends StatelessWidget {
     );
   }
 
-  // Стиль 2: Современный с градиентами
   Widget _buildModernStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -282,7 +277,6 @@ class ScheduleWidget extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          // Иконка
                           Container(
                             width: 40,
                             height: 40,
@@ -312,10 +306,7 @@ class ScheduleWidget extends StatelessWidget {
                                   : colorScheme.primary, // #4C6444
                             ),
                           ),
-
                           const SizedBox(width: 16),
-
-                          // Время
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -336,10 +327,7 @@ class ScheduleWidget extends StatelessWidget {
                               ),
                             ),
                           ),
-
                           const SizedBox(width: 16),
-
-                          // Описание
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,14 +367,13 @@ class ScheduleWidget extends StatelessWidget {
     );
   }
 
-  // Стиль 3: Минималистичный
   Widget _buildMinimalStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
-        margin: const EdgeInsets.symmetric(vertical: 20),
+        margin: const EdgeInsets.symmetric(vertical: 30),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -417,17 +404,13 @@ class ScheduleWidget extends StatelessWidget {
                         color: colorScheme.primary, // #4C6444
                       ),
                     ),
-
                     const SizedBox(width: 8),
-
                     Icon(
                       Icons.arrow_forward_rounded,
                       size: 16,
                       color: colorScheme.secondary.withOpacity(0.5), // #765B50
                     ),
-
                     const SizedBox(width: 12),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,7 +436,6 @@ class ScheduleWidget extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     Icon(
                       item.icon,
                       size: 20,
@@ -469,7 +451,6 @@ class ScheduleWidget extends StatelessWidget {
     );
   }
 
-  // Стиль 4: Таймлайн
   Widget _buildTimelineStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -511,10 +492,8 @@ class ScheduleWidget extends StatelessWidget {
                   ],
                 ),
               ),
-
             Stack(
               children: [
-                // Вертикальная линия таймлайна
                 Positioned(
                   left: 40,
                   top: 30,
@@ -532,8 +511,6 @@ class ScheduleWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Элементы таймлайна
                 Column(
                   children: [
                     for (int i = 0; i < scheduleItems.length; i++)
@@ -542,7 +519,6 @@ class ScheduleWidget extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Точка на линии
                             Container(
                               width: 30,
                               height: 30,
@@ -580,8 +556,6 @@ class ScheduleWidget extends StatelessWidget {
                                     : colorScheme.secondary, // #765B50
                               ),
                             ),
-
-                            // Время
                             SizedBox(
                               width: 60,
                               child: Text(
@@ -593,10 +567,7 @@ class ScheduleWidget extends StatelessWidget {
                                 ),
                               ),
                             ),
-
                             const SizedBox(width: 16),
-
-                            // Описание
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(12),
@@ -665,7 +636,6 @@ class ScheduleWidget extends StatelessWidget {
     );
   }
 
-  // Метод для создания элемента расписания (используется в элегантном стиле)
   Widget _buildScheduleItem(BuildContext context, ScheduleItem item) {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -680,7 +650,6 @@ class ScheduleWidget extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Иконка
           Container(
             width: 40,
             height: 40,
@@ -699,10 +668,7 @@ class ScheduleWidget extends StatelessWidget {
                   : colorScheme.secondary, // #765B50
             ),
           ),
-
           const SizedBox(width: 16),
-
-          // Контент
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -747,7 +713,6 @@ class ScheduleWidget extends StatelessWidget {
   }
 }
 
-// Модель для элемента расписания
 class ScheduleItem {
   final String time;
   final String title;
@@ -764,10 +729,4 @@ class ScheduleItem {
   });
 }
 
-// Стили виджета
-enum ScheduleStyle {
-  elegant, // Элегантный (по умолчанию)
-  modern, // Современный с градиентами
-  minimal, // Минималистичный
-  timeline, // Таймлайн
-}
+enum ScheduleStyle { elegant, modern, minimal, timeline }

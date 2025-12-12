@@ -24,13 +24,24 @@ class LocationWidget extends StatelessWidget {
   Future<void> _openMap(BuildContext context) async {
     final Uri uri = Uri.parse(mapUrl);
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
+        throw Exception('Не удалось открыть карту');
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Не удалось открыть карту'),
           backgroundColor: Theme.of(context).colorScheme.error,
+          action: SnackBarAction(
+            label: 'Попробовать ещё раз',
+            onPressed: () => _openMap(context),
+          ),
         ),
       );
     }
@@ -52,7 +63,7 @@ class LocationWidget extends StatelessWidget {
 
   Widget _buildElegantStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -60,7 +71,6 @@ class LocationWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Декоративный элемент сверху
             Container(
               width: 60,
               height: 2,
@@ -75,8 +85,6 @@ class LocationWidget extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Заголовок
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -109,8 +117,6 @@ class LocationWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-
-            // Карточка с информацией
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -130,7 +136,6 @@ class LocationWidget extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Основной адрес
                   Container(
                     padding: const EdgeInsets.all(16),
                     margin: const EdgeInsets.only(bottom: 16),
@@ -152,8 +157,6 @@ class LocationWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Полный адрес
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
@@ -167,8 +170,6 @@ class LocationWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Разделитель
                   Container(
                     height: 1,
                     margin: const EdgeInsets.symmetric(vertical: 20),
@@ -182,8 +183,6 @@ class LocationWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Кнопка "Открыть карту"
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -199,7 +198,9 @@ class LocationWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 2,
-                        shadowColor: colorScheme.secondary.withOpacity(0.3), // #765B50
+                        shadowColor: colorScheme.secondary.withOpacity(
+                          0.3,
+                        ), // #765B50
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -234,7 +235,7 @@ class LocationWidget extends StatelessWidget {
     IconData icon,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -272,7 +273,7 @@ class LocationWidget extends StatelessWidget {
 
   Widget _buildModernStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
@@ -299,7 +300,6 @@ class LocationWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Заголовок
             ShaderMask(
               shaderCallback: (bounds) {
                 return LinearGradient(
@@ -342,8 +342,6 @@ class LocationWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Адрес
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -373,10 +371,7 @@ class LocationWidget extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // Кнопки действий
             Row(
               children: [
                 Expanded(
@@ -398,7 +393,9 @@ class LocationWidget extends StatelessWidget {
                 IconButton(
                   onPressed: () => _openMap(context),
                   style: IconButton.styleFrom(
-                    backgroundColor: colorScheme.secondary.withOpacity(0.1), // #765B50
+                    backgroundColor: colorScheme.secondary.withOpacity(
+                      0.1,
+                    ), // #765B50
                     padding: const EdgeInsets.all(16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -419,7 +416,7 @@ class LocationWidget extends StatelessWidget {
 
   Widget _buildMinimalStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -427,7 +424,6 @@ class LocationWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Заголовок
             Text(
               title,
               style: TextStyle(
@@ -438,8 +434,6 @@ class LocationWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Основной адрес
             Text(
               mainAddress,
               textAlign: TextAlign.center,
@@ -450,8 +444,6 @@ class LocationWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-
-            // Полный адрес
             Text(
               fullAddress,
               textAlign: TextAlign.center,
@@ -462,8 +454,6 @@ class LocationWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Кнопка
             OutlinedButton.icon(
               onPressed: () => _openMap(context),
               icon: Icon(
@@ -497,7 +487,7 @@ class LocationWidget extends StatelessWidget {
 
   Widget _buildCardStyle(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 450),
@@ -512,7 +502,6 @@ class LocationWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Заголовок с иконкой
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -542,8 +531,6 @@ class LocationWidget extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Адрес
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -575,7 +562,9 @@ class LocationWidget extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
-                          color: colorScheme.primary.withOpacity(0.7), // #4C6444
+                          color: colorScheme.primary.withOpacity(
+                            0.7,
+                          ), // #4C6444
                           height: 1.4,
                         ),
                       ),
@@ -583,14 +572,9 @@ class LocationWidget extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Кнопка
                 FilledButton.icon(
                   onPressed: () => _openMap(context),
-                  icon: Icon(
-                    Icons.open_in_new,
-                    color: Colors.white,
-                  ),
+                  icon: Icon(Icons.open_in_new, color: Colors.white),
                   label: const Text(
                     'Открыть в картах',
                     style: TextStyle(color: Colors.white),

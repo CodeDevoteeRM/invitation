@@ -21,7 +21,6 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
       vsync: this,
     );
 
-    // Фото появляется с масштабом
     _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -44,16 +43,15 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
       child: Column(
         children: [
-          // Контейнер с полупрозрачной полосой на фоне имен
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 0),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF4C6444).withOpacity(0.08), // Темный зеленый
-                  const Color(0xFF91B287).withOpacity(0.12), // Светлый зеленый
-                  const Color(0xFF765B50).withOpacity(0.08), // Коричневый
+                  const Color(0xFF4C6444).withOpacity(0.08), 
+                  const Color(0xFF91B287).withOpacity(0.12),
+                  const Color(0xFF765B50).withOpacity(0.08), 
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -65,7 +63,6 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
               child: Column(
                 children: [
                   const SizedBox(height: 20),
-                  // Заголовок
                   Text(
                     'Роман & Рузанна',
                     textAlign: TextAlign.center,
@@ -77,8 +74,6 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
                       fontFamily: 'Gnocchi',
                     ),
                   ),
-
-                  // Подзаголовок
                   const SizedBox(height: 8),
                   Text(
                     'Создаём нашу историю любви',
@@ -94,10 +89,7 @@ class _AnimatedHeaderWidgetState extends State<AnimatedHeaderWidget>
               ),
             ),
           ),
-
           const SizedBox(height: 40),
-
-          // Фото с анимацией масштаба
           ScaleTransition(scale: _scaleAnimation, child: _buildPhoto(context)),
 
           const SizedBox(height: 40),

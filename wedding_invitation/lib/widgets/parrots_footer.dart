@@ -9,7 +9,6 @@ class ParrotsFooterWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       child: Column(
         children: [
-          // Разделительная линия
           Container(
             width: double.infinity,
             height: 1,
